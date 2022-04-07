@@ -9,7 +9,7 @@ import Foundation
 
 
 struct Character: Identifiable,Codable,Equatable {
-    let id: Int
+    var id: Int
     let name: String
     let image: String
     let status: String

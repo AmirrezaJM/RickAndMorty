@@ -11,6 +11,9 @@ struct CharacterRowView: View {
     // MARK: - Property
     let character: Character
     @StateObject private var characterVM = RickAndMortyViewModel()
+    @EnvironmentObject private var bookmarkVM: bookmarkViewModel
+    
+    @State private var test: Bool = false
     // MARK: - Body
     var body: some View {
         NavigationLink {
@@ -66,9 +69,9 @@ struct CharacterRowView: View {
                     HStack(alignment: .lastTextBaseline) {
                         Spacer()
                         Button {
-                            
+                            toggleBookmark(for: character)
                         } label: {
-                            Image(systemName: "bookmark")
+                            Image(systemName: bookmarkVM.isBookmarked(for: character) ? "bookmark.fill" : "bookmark")
                                 .foregroundColor(.indigo)
                         }
                         .buttonStyle(.bordered)
@@ -78,6 +81,17 @@ struct CharacterRowView: View {
                 } //:VSTACK
             } //:HSTACK
         }
+    }
+    
+    
+    // for checking bookmark is marked or not.
+    private func toggleBookmark(for character: Character) {
+        if bookmarkVM.isBookmarked(for: character) {
+            bookmarkVM.removeBookmark(for: character)
+        } else {
+            bookmarkVM.addBookmark(for: character)
+        }
+       
     }
     
     // function: CheckStatus

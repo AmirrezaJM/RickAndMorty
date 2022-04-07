@@ -14,6 +14,14 @@ struct ContentView: View {
                 .tabItem {
                     Label("Characters",systemImage: "character.book.closed")
                 }
+            SearchTabView()
+                .tabItem {
+                    Label("Search",systemImage: "magnifyingglass")
+                }
+            BookmarkTabView()
+                .tabItem {
+                    Label("Bookmark",systemImage: "bookmark")
+                }
         }
     }
 }
