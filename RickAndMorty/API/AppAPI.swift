@@ -10,9 +10,7 @@ import Foundation
 
 struct AppAPI {
     static let shared = AppAPI()
-    private init() {
-        
-    }
+    private init() {}
     private let session = URLSession.shared
     private let jsonDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
@@ -21,8 +19,8 @@ struct AppAPI {
     }()
     
     // fetch data in project
-    func fetch() async throws -> [Character] {
-        try await fetchCharacter(from: generateRickAndMortyURL())
+    func fetch(page: Int = 1) async throws -> [Character] {
+        try await fetchCharacter(from: generateRickAndMortyURL(page: page))
     }
     
     func search(for name: String) async throws -> [Character] {
@@ -51,18 +49,17 @@ struct AppAPI {
     
     private func generateSearchURL(from query: String) -> URL {
         let percentEncodedString = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
-//        print(percentEncodedString)
         var url = "https://rickandmortyapi.com/api/character/?"
-        url += "page=1"
         url += "&name=\(percentEncodedString)"
         return URL(string: url)!
     }
     
     
     // generate news url with apiKey and other property
-    private func generateRickAndMortyURL() -> URL {
+    private func generateRickAndMortyURL(page: Int = 1) -> URL {
         var url = "https://rickandmortyapi.com/api/character/?"
-        url += "page=1"
+        url += "&page=\(page)"
+        print(url)
         return URL(string: url)!
     }
 }

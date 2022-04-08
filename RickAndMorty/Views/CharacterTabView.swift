@@ -13,10 +13,12 @@ struct CharacterTabView: View {
     // MARK: - Body
     var body: some View {
         NavigationView {
-            CharacterListView(character: characters)
+            CharacterListView(character: characterVM.characters, isFetchingNextPage: characterVM.isFetchingNextPage, nextPageHandler: {
+                await characterVM.loadNextPage()
+            })
                 .overlay(overlayView)
                 .refreshable {
-                    await characterVM.loadCharacter()
+                    await loadTask()
                 }
                 .task {
                     await loadTask()
@@ -63,7 +65,7 @@ struct CharacterTabView: View {
     
     @Sendable
     private func loadTask() async {
-        await characterVM.loadCharacter()
+        await characterVM.loadFirstPage()
     }
     
 }

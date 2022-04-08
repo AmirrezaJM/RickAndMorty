@@ -9,23 +9,17 @@ import Foundation
 import SwiftUI
 
 
-enum DataFetchPhase<T> {
-    case empty
-    case success(T)
-    case failure(Error)
-}
-
-struct FetchTaskToken: Equatable {
-    var category: Category
-    var token: Date
-}
-
-
 @MainActor
 class RickAndMortyViewModel: ObservableObject {
+    
     @Published var phase = DataFetchPhase<[Character]>.empty
     @Published var checkStatus: Bool?
-    private var AppApi = AppAPI.shared
+    private let AppApi = AppAPI.shared
+    private let pagingData = PagingData()
+    
+    var characters: [Character] {
+        phase.value ?? []
+    }
     
     init(characters: [Character]? = nil) {
         if let characters = characters {
@@ -36,11 +30,12 @@ class RickAndMortyViewModel: ObservableObject {
     }
     
     // load character info
-    func loadCharacter() async {
+    func loadFirstPage() async {
+        await pagingData.reset()
         if Task.isCancelled { return }
         phase = .empty
         do {
-            let characters = try await AppApi.fetch()
+            let characters = try await pagingData.loadNextPage(dataFetchProvider: loadCharacter(page:))
             if Task.isCancelled { return }
             phase = .success(characters)
         }
@@ -48,5 +43,34 @@ class RickAndMortyViewModel: ObservableObject {
             if Task.isCancelled { return }
             phase = .failure(error)
         }
+    }
+    
+    var isFetchingNextPage:Bool {
+        if case .fetchNextPage = phase {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    func loadNextPage() async {
+        if Task.isCancelled { return }
+        
+        let characters = self.phase.value ?? []
+        phase = .fetchNextPage(characters)
+        
+        do {
+            let nextCharacter = try await pagingData.loadNextPage(dataFetchProvider: loadCharacter(page:))
+            if Task.isCancelled { return }
+            phase = .success(characters + nextCharacter)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    private func loadCharacter(page: Int) async throws -> [Character] {
+        let characters = try await AppApi.fetch(page: page)
+        if Task.isCancelled { return [] }
+        return characters
     }
 }

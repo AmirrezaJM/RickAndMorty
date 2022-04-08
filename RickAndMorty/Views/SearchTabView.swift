@@ -25,7 +25,7 @@ struct SearchTabView: View {
         })
         .onSubmit(of: .search,search)
     }
-    
+     
     private var characters: [Character] {
         if case let .success(characters) = searchVM.phase {
             return characters
